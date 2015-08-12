@@ -3,6 +3,7 @@
  * @Author Jim Doyle
  * @version 0.1.0
  * @description jQuery plugin for fixed position header that can change position on scroll
+ * @url https://github.com/digitor/jquery.fixedheader
  */
 
 ;(function ( $ ) {
@@ -64,8 +65,6 @@
     var setFixedPos = function($el, offsetY, cb) {
         var scrollAmt = $win.scrollTop();
 
-        console.log( offsetY )
-
         var posY = scrollAmt > offsetY ? 0 : offsetY - scrollAmt;
         $el.css( transformName.css, 'translateY('+posY+'px)' );
 
@@ -88,7 +87,11 @@
      */
     $.fn[pluginName] = function ( options ) {
 
-        var options = options || defaultOptions;
+        // ensures 'options' is an object literal (and not an array either)
+        options = (typeof options !== "object" || $.isArray(options) ) ? {} : options;
+
+        // merge with defaults
+        options = $.extend({}, defaultOptions, options);
 
         return this.each(function () {
 
@@ -96,6 +99,7 @@
 
             // Just incase console isn't present ie8/9, stops JS errors
             if( options.allowConsoleOverride && !window.console ) {
+                window.console = {};
                 console.log = function(){};
                 console.warn = function(){};
                 console.error = function(){};
@@ -124,6 +128,8 @@
                 setFixedPos($this, options.offsetY, options.onUpdate);
 
                 $win.on("scroll", scrollHandler);
+
+                $this.data('inited', true);
             }
         });
     };
