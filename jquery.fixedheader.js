@@ -24,7 +24,7 @@
             var rtnObj = {
                 css: null, js: null
             }
-            
+
             if( st.getPropertyValue("transform") !== null ) {
                 rtnObj.css = "transform";
                 rtnObj.js = "transform";
@@ -42,19 +42,19 @@
                 rtnObj.js = "MozTransform";
                 return rtnObj;
             }
-            
+
             if( st.getPropertyValue("-ms-transform") !== null ) {
                 rtnObj.css = "-ms-transform";
                 rtnObj.js = "msTransform";
                 return rtnObj;
             }
-            
+
             if( st.getPropertyValue("-o-transform") !== null ) {
                 rtnObj.css = "-o-transform";
                 rtnObj.js = "OTransform";
                 return rtnObj;
             }
-            
+
             return null;
         }
     }
@@ -108,12 +108,16 @@
             if( $this.css('position') !== 'fixed' )
                 console.warn('jQuery.'+pluginName, "Your target element doesn't have 'position:fixed' CSS property. Plugin won't work without it!" );
 
-
             var scrollHandler = function() {
-                setFixedPos($this, options.offsetY, options.onUpdate);
+                console.log(pluginName, "scrollHandler");
+                var opts = $this.data('options');
+                setFixedPos($this, opts.offsetY, opts.onUpdate);
             }
 
+            $this.data('options', options);
+
             if( options.destroy ) {
+                console.log(pluginName, "destroy");
                 $el.css( transformName.css, 'translateY(0)' );
                 $win.off("scroll", scrollHandler);
                 return;
