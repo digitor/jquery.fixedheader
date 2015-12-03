@@ -6,7 +6,7 @@
  * @url https://github.com/digitor/jquery.fixedheader
  */
 
-;(function ( $ ) {
+; (function ($) {
     var pluginName = "fixedHeader";
 
     /**
@@ -18,38 +18,38 @@
 
     var utils = {
         // So we know what browser we're using and if it needs vendor prefixes for transform property
-        getTransformName: function() {
+        getTransformName: function () {
             var st = window.getComputedStyle(document.body, null);
 
             var rtnObj = {
                 css: null, js: null
             }
 
-            if( st.getPropertyValue("transform") !== null ) {
+            if (st.getPropertyValue("transform") !== null) {
                 rtnObj.css = "transform";
                 rtnObj.js = "transform";
                 return rtnObj;
             }
 
-            if( st.getPropertyValue("-webkit-transform") !== null ) {
+            if (st.getPropertyValue("-webkit-transform") !== null) {
                 rtnObj.css = "-webkit-transform";
                 rtnObj.js = "webkitTransform";
                 return rtnObj;
             }
 
-            if( st.getPropertyValue("-moz-transform") !== null )    {
+            if (st.getPropertyValue("-moz-transform") !== null) {
                 rtnObj.css = "-moz-transform";
                 rtnObj.js = "MozTransform";
                 return rtnObj;
             }
 
-            if( st.getPropertyValue("-ms-transform") !== null ) {
+            if (st.getPropertyValue("-ms-transform") !== null) {
                 rtnObj.css = "-ms-transform";
                 rtnObj.js = "msTransform";
                 return rtnObj;
             }
 
-            if( st.getPropertyValue("-o-transform") !== null ) {
+            if (st.getPropertyValue("-o-transform") !== null) {
                 rtnObj.css = "-o-transform";
                 rtnObj.js = "OTransform";
                 return rtnObj;
@@ -60,15 +60,16 @@
     }
 
     var transformName = utils.getTransformName() // stores varied CSS property names for transform, depending on browser (needed for setting inline styles)
-        ,$win = $(window);
+        , $win = $(window);
 
-    var setFixedPos = function($el, offsetY, cb) {
+    var setFixedPos = function ($el, offsetY, cb, passiveMode) {
         var scrollAmt = $win.scrollTop();
 
         var posY = scrollAmt > offsetY ? 0 : offsetY - scrollAmt;
-        $el.css( transformName.css, 'translateY('+posY+'px)' );
 
-        if(cb) cb();
+        if (!passiveMode) $el.css(transformName.css, 'translateY(' + posY + 'px)');
+
+        if (cb) cb(posY, transformName);
     }
 
     /**
@@ -79,16 +80,17 @@
         offsetY: 80,
         allowConsoleOverride: true,
         onUpdate: null,
-        destroy: false
+        destroy: false,
+        passiveMode: false
     };
 
     /**
      * Creates the plugin instance
      */
-    $.fn[pluginName] = function ( options ) {
+    $.fn[pluginName] = function (options) {
 
         // ensures 'options' is an object literal (and not an array either)
-        options = (typeof options !== "object" || $.isArray(options) ) ? {} : options;
+        options = (typeof options !== "object" || $.isArray(options)) ? {} : options;
 
         // merge with defaults
         options = $.extend({}, defaultOptions, options);
@@ -98,38 +100,38 @@
             var $this = $(this);
 
             // Just incase console isn't present ie8/9, stops JS errors
-            if( options.allowConsoleOverride && !window.console ) {
+            if (options.allowConsoleOverride && !window.console) {
                 window.console = {};
-                console.log = function(){};
-                console.warn = function(){};
-                console.error = function(){};
+                console.log = function () { };
+                console.warn = function () { };
+                console.error = function () { };
             }
 
-            if( $this.css('position') !== 'fixed' )
-                console.warn('jQuery.'+pluginName, "Your target element doesn't have 'position:fixed' CSS property. Plugin won't work without it!" );
+            if ($this.css('position') !== 'fixed')
+                console.warn('jQuery.' + pluginName, "Your target element doesn't have 'position:fixed' CSS property. Plugin won't work without it!");
 
-            var scrollHandler = function() {
+            var scrollHandler = function () {
                 console.log(pluginName, "scrollHandler");
                 var opts = $this.data('options');
-                setFixedPos($this, opts.offsetY, opts.onUpdate);
+                setFixedPos($this, opts.offsetY, opts.onUpdate, options.passiveMode);
             }
 
             $this.data('options', options);
 
-            if( options.destroy ) {
+            if (options.destroy) {
                 console.log(pluginName, "destroy");
-                $el.css( transformName.css, 'translateY(0)' );
+                $el.css(transformName.css, 'translateY(0)');
                 $win.off("scroll", scrollHandler);
                 return;
             }
 
-            setFixedPos($this, options.offsetY, options.onUpdate);
+            setFixedPos($this, options.offsetY, options.onUpdate, options.passiveMode);
 
             // if already inited, just allow the options to be updated above
-            if( !$this.data('inited') ) {
+            if (!$this.data('inited')) {
 
                 // call the main function once first, then listen on scroll
-                setFixedPos($this, options.offsetY, options.onUpdate);
+                setFixedPos($this, options.offsetY, options.onUpdate, options.passiveMode);
 
                 $win.on("scroll", scrollHandler);
 
@@ -138,4 +140,4 @@
         });
     };
 
-})( jQuery );
+})(jQuery);
